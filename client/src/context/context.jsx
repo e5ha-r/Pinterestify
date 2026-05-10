@@ -10,6 +10,10 @@ export function AppProvider({ children }) {
   const [boards, setBoards] = useState([]);
   const [pins,   setPins]   = useState([]);
 
+  // Track whether the current user has Spotify connected.
+  // This is fetched from the server on login and refreshed after the OAuth callback.
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
+
   const login = useCallback((userData) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
@@ -19,6 +23,7 @@ export function AppProvider({ children }) {
   const logout = useCallback(() => {
     setUser(null);
     setBoards([]);
+    setSpotifyConnected(false);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
   }, []);
@@ -80,22 +85,36 @@ export function AppProvider({ children }) {
     return data;
   }, []);
 
-  // Spotify helpers
+  // ─── Spotify ──────────────────────────────────────────────────────────────
 
-  // FIX: Pass userId as a query param so the server knows who is connecting.
+  // Fetch connection status from the server and update local state.
+  const refreshSpotifyStatus = useCallback(async () => {
+    try {
+      const { data } = await api.get("/spotify/status");
+      setSpotifyConnected(data.connected);
+      return data.connected;
+    } catch {
+      setSpotifyConnected(false);
+      return false;
+    }
+  }, []);
+
+  // Redirect the browser to Spotify's auth page.
   // We use the full server URL (not /api/...) because this is a browser redirect,
   // not an axios call — Vite's proxy only works for fetch/axios, not window.location.
   const connectSpotify = useCallback(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
+    // Support both _id (from DB) and userId (alias stored at login)
     const userId = storedUser?._id || storedUser?.userId;
     if (!userId) {
       console.error("connectSpotify: no userId found in localStorage");
       return;
     }
-    window.location.href = `${import.meta.env.VITE_API_URL}/api/spotify/login?userId=${userId}`;
+    const serverUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:5050";
+    window.location.href = `${serverUrl}/api/spotify/login?userId=${userId}`;
   }, []);
 
-  // FIX: No token argument needed — the JWT interceptor in api.js handles auth automatically.
+  // Fetch the user's Spotify playlists. Returns { items: [...] } or { items: [] }.
   const fetchSpotifyPlaylists = useCallback(async () => {
     try {
       const { data } = await api.get("/spotify/playlists");
@@ -107,8 +126,15 @@ export function AppProvider({ children }) {
           image: p.images?.[0]?.url || "https://picsum.photos/id/20/400/400",
         }))
       };
-    } catch { return { items: [] }; }
+    } catch (err) {
+      // A 401 here means "not connected" — not a session expiry.
+      // The api.js interceptor won't log us out for Spotify routes.
+      console.warn("fetchSpotifyPlaylists:", err.response?.data?.message || err.message);
+      return { items: [] };
+    }
   }, []);
+
+  // ─── Effects ──────────────────────────────────────────────────────────────
 
   useEffect(() => {
     fetchPins();
@@ -116,9 +142,14 @@ export function AppProvider({ children }) {
   }, [fetchPins, fetchBoards]);
 
   useEffect(() => {
-    if (user) fetchBoards();
-    else setBoards([]);
-  }, [user, fetchBoards]);
+    if (user) {
+      fetchBoards();
+      refreshSpotifyStatus();
+    } else {
+      setBoards([]);
+      setSpotifyConnected(false);
+    }
+  }, [user, fetchBoards, refreshSpotifyStatus]);
 
   return (
     <AppContext.Provider value={{
@@ -126,6 +157,7 @@ export function AppProvider({ children }) {
       boards, fetchBoards, createBoard, deleteBoard, updateBoard,
       savePinToBoard, removePinFromBoard, addPlaylistToBoard,
       pins, fetchPins, createPin,
+      spotifyConnected, setSpotifyConnected, refreshSpotifyStatus,
       connectSpotify, fetchSpotifyPlaylists,
     }}>
       {children}

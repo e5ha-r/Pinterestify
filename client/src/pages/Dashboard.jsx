@@ -14,15 +14,28 @@ function Dashboard() {
     const [selectedPin, setSelectedPin] = useState(null);
     const [openPin, setOpenPin] = useState(null);
     const [search, setSearch] = useState("");
-    const { boards, pins, savePinToBoard } = useContext(AppContext);
+    const { boards, pins, savePinToBoard, refreshSpotifyStatus } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
+
+        // Handle search query param
         const s = params.get("search");
         if (s) setSearch(s);
-    }, [location.search]);
+
+        // Handle Spotify OAuth callback redirect
+        const spotifyParam = params.get("spotify");
+        if (spotifyParam === "connected") {
+            showToast("Spotify connected! 🎵");
+            refreshSpotifyStatus();
+            navigate("/dashboard", { replace: true });
+        } else if (spotifyParam === "error") {
+            showToast("Spotify connection failed. Please try again.");
+            navigate("/dashboard", { replace: true });
+        }
+    }, [location.search, navigate, refreshSpotifyStatus]);
 
     const filtered = search.trim()
         ? pins.filter(p =>

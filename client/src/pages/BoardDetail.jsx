@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -6,7 +6,6 @@ import Modal from "../components/Modal";
 import PlaylistCard from "../components/PlaylistCard";
 import { AppContext } from "../context/context";
 import { showToast } from "../utils/toast";
-import api from "../api";
 
 const SAMPLE_PLAYLISTS = [
   { id: "37i9dQZF1DXcBWIGoYBM5M", name: "Today's Top Hits", tracks: 50, image: "https://picsum.photos/id/20/400/400" },
@@ -18,6 +17,7 @@ const SAMPLE_PLAYLISTS = [
 function BoardDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [playlistModal, setPlaylistModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
@@ -25,31 +25,37 @@ function BoardDetail() {
   const [spotifyPlaylists, setSpotifyPlaylists] = useState([]);
   const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
 
-  // FIX: Track Spotify connection via API call instead of checking a
-  // "spotify_token" key in localStorage (which was never set by the app).
-  const [spotifyConnected, setSpotifyConnected] = useState(false);
-
-  const { boards, deleteBoard, updateBoard, addPlaylistToBoard, removePinFromBoard, fetchSpotifyPlaylists, connectSpotify } = useContext(AppContext);
+  const {
+    boards, deleteBoard, updateBoard,
+    addPlaylistToBoard, removePinFromBoard,
+    fetchSpotifyPlaylists, connectSpotify,
+    spotifyConnected, refreshSpotifyStatus,
+  } = useContext(AppContext);
 
   const board = boards.find(b => b._id === id || b.id === parseInt(id));
 
-  // FIX: Check Spotify connection status from the server on mount.
+  // After Spotify OAuth, the server redirects back with ?spotify=connected or
+  // ?spotify=error. Handle both cases and clean up the URL.
   useEffect(() => {
-    api.get("/spotify/status")
-      .then(({ data }) => setSpotifyConnected(data.connected))
-      .catch(() => setSpotifyConnected(false));
-  }, []);
+    const params = new URLSearchParams(location.search);
+    const spotifyParam = params.get("spotify");
+    if (spotifyParam === "connected") {
+      showToast("Spotify connected! 🎵");
+      refreshSpotifyStatus();
+      // Remove the query param so refresh doesn't retrigger this
+      navigate(location.pathname, { replace: true });
+    } else if (spotifyParam === "error") {
+      showToast("Spotify connection failed. Try again.");
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.search, location.pathname, navigate, refreshSpotifyStatus]);
 
-  // FIX: Gate on spotifyConnected (not a missing localStorage key).
-  // FIX: Call fetchSpotifyPlaylists() with no arguments — JWT is sent automatically.
-  // FIX: context already maps the shape, so use data.items directly.
+  // Load playlists whenever the modal opens and Spotify is connected
   useEffect(() => {
     if (playlistModal && spotifyConnected) {
       setIsLoadingPlaylists(true);
       fetchSpotifyPlaylists().then(data => {
-        if (data && data.items) {
-          setSpotifyPlaylists(data.items);
-        }
+        setSpotifyPlaylists(data?.items || []);
         setIsLoadingPlaylists(false);
       });
     }
@@ -103,10 +109,9 @@ function BoardDetail() {
     }
   };
 
-  // Determine what to play in the iframe
-  const playingPlaylistId = board.playlists?.length > 0 
-    ? board.playlists[board.playlists.length - 1].id 
-    : "37i9dQZF1DXcBWIGoYBM5M"; // Fallback to a default playlist if none are attached
+  const playingPlaylistId = board.playlists?.length > 0
+    ? board.playlists[board.playlists.length - 1].id
+    : "37i9dQZF1DXcBWIGoYBM5M";
 
   return (
     <div>
@@ -120,7 +125,7 @@ function BoardDetail() {
             <p style={styles.meta}>{board.pins?.length || 0} pins · {board.playlists?.length || 0} playlists</p>
           </div>
           <div style={styles.actions}>
-            <button onClick={() => setPlaylistModal(true)} style={styles.musicBtn}>Add Music</button>
+            <button onClick={() => setPlaylistModal(true)} style={styles.musicBtn}>🎵 Add Music</button>
             <button onClick={() => setEditModal(true)} style={styles.editBtn}>Edit Board</button>
             <button onClick={() => setDeleteModal(true)} style={styles.deleteBtn}>Delete</button>
           </div>
@@ -134,7 +139,7 @@ function BoardDetail() {
                 {board.pins.map((pin, i) => (
                   <div key={pin._id || i} style={{ position: "relative" }}>
                     <img src={pin.image} alt="" style={styles.pinImg} />
-                    <button 
+                    <button
                       onClick={() => handleRemovePin(pin._id || pin.id)}
                       style={styles.removePinBtn}
                       title="Remove Pin"
@@ -183,74 +188,84 @@ function BoardDetail() {
         </div>
       </div>
 
+      {/* ── Add Music Modal ── */}
       <Modal isOpen={playlistModal} onClose={() => setPlaylistModal(false)} title="Add Music">
-        {/* FIX: Use spotifyConnected state (from /api/spotify/status) instead of
-            checking localStorage("spotify_token") which was never written. */}
         {!spotifyConnected ? (
-          <>
-            <div style={{ textAlign:"center", padding:"20px 12px" }}>
-              <p style={{ fontFamily:"Cabinet Grotesk,sans-serif", fontWeight:700, fontSize:15, color:"#1A1A2E", marginBottom:16 }}>
-                Connect Spotify to attach your real playlists, or use these sample ones:
-              </p>
-              <button
-                onClick={() => { setPlaylistModal(false); connectSpotify(); }}
-                style={{ background:"#1DB954", color:"white", border:"2px solid #1A1A2E", borderRadius:99, padding:"10px 24px", fontFamily:"Cabinet Grotesk,sans-serif", fontWeight:800, fontSize:14, cursor:"pointer", marginBottom:20, boxShadow:"2px 2px 0 #1A1A2E" }}
-              >
-                Connect Spotify 🎵
-              </button>
-            </div>
+          <div style={{ textAlign: "center", padding: "20px 12px" }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>🎵</div>
+            <p style={styles.connectSpotifyText}>
+              Connect your Spotify account to attach your real playlists to this board.
+            </p>
+            <button
+              onClick={() => { setPlaylistModal(false); connectSpotify(); }}
+              style={styles.connectSpotifyBtn}
+            >
+              Connect Spotify
+            </button>
+            <p style={{ fontFamily: "Cabinet Grotesk, sans-serif", fontSize: 13, color: "#7A7080", margin: "20px 0 12px" }}>
+              Or attach a sample playlist:
+            </p>
             <div style={styles.plGrid}>
               {SAMPLE_PLAYLISTS.map(pl => (
                 <PlaylistCard key={pl.id} playlist={pl} onAttach={handleAttach} />
               ))}
             </div>
-          </>
+          </div>
         ) : isLoadingPlaylists ? (
-          <p style={styles.loadingPlaylistsText}>Loading your Spotify playlists...</p>
-        ) : spotifyPlaylists.length > 0 ? (
+          <div style={{ textAlign: "center", padding: "48px 24px" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>⏳</div>
+            <p style={styles.loadingPlaylistsText}>Loading your Spotify playlists…</p>
+          </div>
+        ) : spotifyPlaylists.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "32px 12px" }}>
+            <p style={{ fontFamily: "Cabinet Grotesk, sans-serif", color: "#7A7080" }}>
+              No playlists found on your Spotify account.
+            </p>
+          </div>
+        ) : (
           <div style={styles.plGrid}>
             {spotifyPlaylists.map(pl => (
               <PlaylistCard key={pl.id} playlist={pl} onAttach={handleAttach} />
             ))}
           </div>
-        ) : (
-          <p style={styles.loadingPlaylistsText}>No public playlists found on your account.</p>
         )}
       </Modal>
 
+      {/* ── Edit Board Modal ── */}
       <Modal isOpen={editModal} onClose={() => setEditModal(false)} title="Edit Board">
-        <form onSubmit={handleEditBoard} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <form onSubmit={handleEditBoard} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label style={styles.formLabel}>Board Name</label>
-            <input 
-              style={styles.formInput} 
-              value={editTitle} 
-              onChange={e => setEditTitle(e.target.value)} 
+            <label style={styles.formLabel}>Board Title</label>
+            <input
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              style={styles.formInput}
+              placeholder="My awesome board"
+              required
             />
           </div>
           <label style={styles.checkboxLabel}>
-            <input 
-              type="checkbox" 
-              checked={editIsPublic} 
-              onChange={e => setEditIsPublic(e.target.checked)} 
-              style={{ accentColor: "#FF5EBA", width: "18px", height: "18px" }}
+            <input
+              type="checkbox"
+              checked={editIsPublic}
+              onChange={e => setEditIsPublic(e.target.checked)}
             />
-            Make this board public
+            Public board
           </label>
-          <div style={styles.confirmBtns}>
-            <button type="button" onClick={() => setEditModal(false)} style={styles.cancelBtn}>Cancel</button>
-            <button type="submit" style={styles.confirmDeleteBtn}>Save Changes</button>
-          </div>
+          <button type="submit" className="btn-primary" style={{ width: "100%" }}>
+            Save Changes
+          </button>
         </form>
       </Modal>
 
-      <Modal isOpen={deleteModal} onClose={() => setDeleteModal(false)} title="Delete Board">
+      {/* ── Delete Confirm Modal ── */}
+      <Modal isOpen={deleteModal} onClose={() => setDeleteModal(false)} title="Delete Board?">
         <p style={styles.confirmText}>
-          Are you sure you want to delete <strong>{board.title}</strong>? This cannot be undone.
+          This will permanently delete <strong>{board.title}</strong> and all its saved pins.
         </p>
         <div style={styles.confirmBtns}>
           <button onClick={() => setDeleteModal(false)} style={styles.cancelBtn}>Cancel</button>
-          <button onClick={handleDelete} style={styles.confirmDeleteBtn}>Delete Forever</button>
+          <button onClick={handleDelete} style={styles.confirmDeleteBtn}>Yes, Delete</button>
         </div>
       </Modal>
     </div>
@@ -268,10 +283,7 @@ const styles = {
     fontFamily: "Fraunces, serif",
     fontSize: "40px", fontWeight: 700, color: "#1A1A2E", marginBottom: "6px",
   },
-  meta: {
-    fontFamily: "Cabinet Grotesk, sans-serif",
-    color: "#7A7080", fontSize: "14px",
-  },
+  meta: { fontFamily: "Cabinet Grotesk, sans-serif", color: "#7A7080", fontSize: "14px" },
   actions: { display: "flex", gap: "12px" },
   musicBtn: {
     background: "#1DB954", color: "white",
@@ -285,34 +297,16 @@ const styles = {
     fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 800, fontSize: "13px",
     cursor: "pointer",
   },
-  layout: {
-    display: "grid",
-    gridTemplateColumns: "1fr 340px",
-    gap: "24px", alignItems: "start",
-  },
-  pinsCol: {
-    background: "white", borderRadius: "20px",
-    border: "2px solid #EAE0D5", padding: "24px",
-  },
+  layout: { display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px", alignItems: "start" },
+  pinsCol: { background: "white", borderRadius: "20px", border: "2px solid #EAE0D5", padding: "24px" },
   musicCol: {
     background: "white", borderRadius: "20px",
     border: "2px solid #EAE0D5", padding: "24px",
     position: "sticky", top: "80px",
   },
-  colTitle: {
-    fontFamily: "Fraunces, serif",
-    fontWeight: 700, fontSize: "18px",
-    color: "#1A1A2E", marginBottom: "16px",
-  },
-  pinsGrid: {
-    display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px",
-  },
-  pinImg: {
-    width: "100%", borderRadius: "12px",
-    objectFit: "cover", aspectRatio: "4/5",
-    border: "2px solid #EAE0D5",
-    display: "block",
-  },
+  colTitle: { fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: "18px", color: "#1A1A2E", marginBottom: "16px" },
+  pinsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" },
+  pinImg: { width: "100%", borderRadius: "12px", objectFit: "cover", aspectRatio: "4/5", border: "2px solid #EAE0D5", display: "block" },
   removePinBtn: {
     position: "absolute", top: "8px", right: "8px",
     background: "white", color: "#FF2D55",
@@ -328,6 +322,7 @@ const styles = {
     border: "2px solid #1A1A2E", fontWeight: 700,
     fontSize: "14px", cursor: "pointer",
     boxShadow: "2px 2px 0 #1A1A2E",
+    fontFamily: "Cabinet Grotesk, sans-serif",
   },
   playerWrap: { borderRadius: "12px", overflow: "hidden" },
   playlistList: { display: "flex", flexDirection: "column", gap: "8px" },
@@ -337,72 +332,30 @@ const styles = {
     border: "1.5px solid #EAE0D5",
   },
   plDot: { width: "8px", height: "8px", borderRadius: "50%", background: "#FF5EBA", flexShrink: 0 },
-  plName: {
-    fontFamily: "Cabinet Grotesk, sans-serif",
-    fontWeight: 700, fontSize: "13px", color: "#1A1A2E",
-  },
-  plCount: {
-    fontFamily: "Cabinet Grotesk, sans-serif",
-    fontSize: "11px", color: "#7A7080", marginLeft: "auto",
-  },
-  empty: {
-    textAlign: "center", padding: "48px",
-    display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
-  },
+  plName: { fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 700, fontSize: "13px", color: "#1A1A2E" },
+  plCount: { fontFamily: "Cabinet Grotesk, sans-serif", fontSize: "11px", color: "#7A7080", marginLeft: "auto" },
+  empty: { textAlign: "center", padding: "48px", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" },
   emptyIcon: { fontSize: "40px", color: "#EAE0D5" },
   emptyText: { fontFamily: "Cabinet Grotesk, sans-serif", color: "#7A7080", fontSize: "14px" },
-  emptySmall: {
-    fontFamily: "Cabinet Grotesk, sans-serif",
-    color: "#7A7080", fontSize: "13px", textAlign: "center", padding: "16px",
+  emptySmall: { fontFamily: "Cabinet Grotesk, sans-serif", color: "#7A7080", fontSize: "13px", textAlign: "center", padding: "16px" },
+  plGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "14px" },
+  connectSpotifyText: { fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 700, fontSize: 15, color: "#1A1A2E", marginBottom: 16 },
+  connectSpotifyBtn: {
+    background: "#1DB954", color: "white",
+    border: "2px solid #1A1A2E", borderRadius: 99, padding: "10px 28px",
+    fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 800, fontSize: 14,
+    cursor: "pointer", boxShadow: "2px 2px 0 #1A1A2E",
   },
-  plGrid: {
-    display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "14px",
-  },
-  connectSpotifyWrap: {
-    textAlign: "center", padding: "24px 12px",
-  },
-  connectSpotifyText: {
-    fontFamily: "Cabinet Grotesk, sans-serif", fontSize: "15px", color: "#1A1A2E", fontWeight: 700,
-  },
-  loadingPlaylistsText: {
-    textAlign: "center", padding: "24px", fontFamily: "Cabinet Grotesk, sans-serif", color: "#7A7080",
-  },
+  loadingPlaylistsText: { textAlign: "center", padding: "24px", fontFamily: "Cabinet Grotesk, sans-serif", color: "#7A7080" },
   notFound: { textAlign: "center", padding: "80px 20px" },
-  notFoundTitle: {
-    fontFamily: "Fraunces, serif", fontSize: "28px", fontWeight: 700, marginBottom: "20px",
-  },
-  confirmText: {
-    fontFamily: "Cabinet Grotesk, sans-serif",
-    fontSize: "15px", color: "#1A1A2E", marginBottom: "24px", lineHeight: 1.6,
-  },
+  notFoundTitle: { fontFamily: "Fraunces, serif", fontSize: "28px", fontWeight: 700, marginBottom: "20px" },
+  confirmText: { fontFamily: "Cabinet Grotesk, sans-serif", fontSize: "15px", color: "#1A1A2E", marginBottom: "24px", lineHeight: 1.6 },
   confirmBtns: { display: "flex", gap: "12px" },
-  cancelBtn: {
-    flex: 1, padding: "12px", background: "#FFF8EE",
-    border: "2px solid #EAE0D5", borderRadius: "12px",
-    fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 700, cursor: "pointer",
-  },
-  confirmDeleteBtn: {
-    flex: 1, padding: "12px", background: "#FF2D55",
-    color: "white", border: "2px solid #1A1A2E", borderRadius: "12px",
-    fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 800, cursor: "pointer",
-    boxShadow: "2px 2px 0 #1A1A2E",
-  },
-  formLabel: {
-    fontFamily: "Cabinet Grotesk, sans-serif",
-    fontWeight: 800, fontSize: "14px", color: "#1A1A2E",
-    textTransform: "uppercase", letterSpacing: "0.05em",
-    display: "block", marginBottom: "8px",
-  },
-  formInput: {
-    width: "100%", padding: "14px 16px", borderRadius: "12px",
-    border: "2px solid #EAE0D5", fontFamily: "Cabinet Grotesk, sans-serif",
-    fontSize: "16px", color: "#1A1A2E", outline: "none", boxSizing: "border-box"
-  },
-  checkboxLabel: {
-    display: "flex", alignItems: "center", gap: "12px",
-    fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 700, fontSize: "15px",
-    cursor: "pointer", color: "#1A1A2E",
-  },
+  cancelBtn: { flex: 1, padding: "12px", background: "#FFF8EE", border: "2px solid #EAE0D5", borderRadius: "12px", fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 700, cursor: "pointer" },
+  confirmDeleteBtn: { flex: 1, padding: "12px", background: "#FF2D55", color: "white", border: "2px solid #1A1A2E", borderRadius: "12px", fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 800, cursor: "pointer", boxShadow: "2px 2px 0 #1A1A2E" },
+  formLabel: { fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 800, fontSize: "14px", color: "#1A1A2E", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: "8px" },
+  formInput: { width: "100%", padding: "14px 16px", borderRadius: "12px", border: "2px solid #EAE0D5", fontFamily: "Cabinet Grotesk, sans-serif", fontSize: "16px", color: "#1A1A2E", outline: "none", boxSizing: "border-box" },
+  checkboxLabel: { display: "flex", alignItems: "center", gap: "12px", fontFamily: "Cabinet Grotesk, sans-serif", fontWeight: 700, fontSize: "15px", cursor: "pointer", color: "#1A1A2E" },
 };
 
 export default BoardDetail;

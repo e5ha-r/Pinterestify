@@ -11,11 +11,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// On 401, clear storage and redirect to login
+// On 401, clear storage and redirect to login — BUT NOT for Spotify routes.
+// Spotify playlists return 401 when the user hasn't connected yet; that's a
+// normal "not connected" state, not an expired session. Intercepting those 401s
+// would log the user out accidentally.
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const isSpotifyRoute = err.config?.url?.includes('/spotify/');
+    if (err.response?.status === 401 && !isSpotifyRoute) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/';
