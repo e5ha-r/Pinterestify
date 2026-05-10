@@ -1,0 +1,107 @@
+/* ── Google Fonts ──────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=Cabinet+Grotesk:wght@400;700;800&display=swap');
+
+/* ── Reset / Base ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #FFFCF5;
+  color: #1A1A2E;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Gradient text ─────────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #FF5EBA 0%, #9B5DE5 50%, #38CFFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Masonry grid ──────────────────────────────────────────────────────── */
+.masonry-grid {
+  columns: 5 220px;
+  column-gap: 14px;
+  padding: 0 24px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 14px;
+  opacity: 0;
+  animation: fadeUp 0.4s ease forwards;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Modal overlay ─────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,26,46,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 500;
+  backdrop-filter: blur(5px);
+  padding: 20px;
+}
+
+/* ── Auth background polka dots ────────────────────────────────────────── */
+.auth-bg {
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, #EAE0D5 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Animations ────────────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+.float { animation: float 3s ease-in-out infinite; }
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(8deg); }
+  75%       { transform: rotate(-8deg); }
+}
+.wiggle { animation: wiggle 2.5s ease-in-out infinite; }
+
+/* ── Button base ───────────────────────────────────────────────────────── */
+.btn-primary {
+  background: #FF5EBA;
+  color: white;
+  border: 2.5px solid #1A1A2E;
+  border-radius: 99px;
+  padding: 12px 28px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #1A1A2E;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: inline-block;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0 #1A1A2E;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #FFFCF5; }
+::-webkit-scrollbar-thumb { background: #EAE0D5; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #D4C9C0; }
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .masonry-grid { columns: 2 150px; padding: 0 12px 24px; }
+}
+@media (max-width: 480px) {
+  .masonry-grid { columns: 1; }
+}
