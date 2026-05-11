@@ -226,12 +226,9 @@ GET /api/spotify/playlists
 Returns playlists to frontend
 ```
 
-### Token Refresh (Automatic)
-Spotify access tokens expire after **1 hour**. Our backend handles this automatically:
-- Stores the **refresh token** in MongoDB
-- On any 401 from Spotify, calls `/api/token` with `grant_type=refresh_token`
-- Saves the new access token to MongoDB
-- Retries the original request transparently
+### Unsuccessful Integration
+Spotify does not give access to it db unless its 25 whitelisted users. 
+So we were not able to access the spotify data and get OAUTH. hence we had to use the publicallly available playlists only.
 
 ---
 
