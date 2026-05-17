@@ -264,12 +264,6 @@ echo "VITE_API_BASE_URL=http://localhost:8000" > .env
 npm run dev
 ```
 
-#### 4️⃣ Access Application
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-
----
-
 ## 📚 API Documentation
 
 ### Authentication Endpoints
