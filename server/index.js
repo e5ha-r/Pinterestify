@@ -20,9 +20,8 @@ const app = express();
 // --- 1. MIDDLEWARE SETUP ---
 app.use(cors({
     origin: [
-        "https://pinterestify-3l0opnrv5-e5ha-rs-projects.vercel.app",  // Production Vercel
         "http://127.0.0.1:5173",
-        "http://localhost:5173",    // Local development
+        "https://pinterestify-frontend-production-d7ce.up.railway.app/"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
