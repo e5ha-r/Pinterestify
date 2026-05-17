@@ -277,32 +277,5 @@ So we were not able to access the spotify data and get OAUTH. hence we had to us
 ## 🚀 Deployment (Bonus)
 
 ### Frontend → Vercel
-```bash
-cd client
-npm run build
-# Push to GitHub, connect to Vercel, auto-deploys
-```
-
-### Backend → Render
-1. Connect your GitHub repo to [render.com](https://render.com)
-2. New Web Service → Root directory: `server`
-3. Build command: `npm install`
-4. Start command: `node index.js`
-5. Add Environment Variables (from your `.env`) in Render's dashboard
-
-### After deployment:
-- Update `server/.env` `SPOTIFY_REDIRECT_URI` to your Render URL
-- Update Spotify Dashboard redirect URI to match
-- Update CORS `origin` in `server/index.js` to your Vercel URL
-- Update Vite proxy in `client/vite.config.js` to your Render URL
-
----
-
-## 👥 Team Distribution
-
-| Member | Role                                | Key Files |
-|--------|-------------------------------------|-----------|
-| 1      | UI/UX + Frontend Architecture       | All `.jsx` pages + components, `index.css` |
-| 2      | Frontend Logic + API Integration    | `context.jsx`, `api.js`, Dashboard, Explore |
-| 3      | Backend Engineer                    | `server/index.js`, all routes, middleware |
-| 4      | Database + Spotify Integration      | MongoDB models, `spotify.js` route, seed.js |
+[connect to Vercel, auto-deploys](https://pinterestify.vercel.app/)
+``
