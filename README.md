@@ -2,6 +2,8 @@
 
 > A full-stack Pinterest-inspired web application enhanced with Spotify integration, enabling users to create aesthetic visual boards and attach music playlists to enrich the browsing experience.
 
+<img width="654" height="533" alt="image" src="https://github.com/user-attachments/assets/6d2c9df7-13e1-48c2-9807-82fd681cfc71" />
+
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
 ![React](https://img.shields.io/badge/React-18-blue)
@@ -455,9 +457,6 @@ npm run test:e2e
 - **Impact**: Full OAuth integration may not be accessible publicly until app is verified
 - **Workaround**: Use embedded playlist playback or Spotify Web API with API keys
 
-### 📱 Mobile Responsiveness
-- Current version optimized for desktop (improvements in v2.0)
-- Mobile PWA version planned
 
 ### 🔄 Real-time Updates
 - No WebSocket support for collaborative editing (future feature)
@@ -510,27 +509,12 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 
 ---
 
-## 👨‍💻 Author
-
-**e5ha-r** - Full-Stack Developer
-- GitHub: [@e5ha-r](https://github.com/e5ha-r)
-- Project: [Pinterestify](https://github.com/e5ha-r/Pinterestify)
-
----
 
 ## 🙏 Acknowledgments
 
-- [Spotify Web API](https://developer.spotify.com/documentation/web-api) for music integration
 - [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) for reliable database
 - [Vercel](https://vercel.com) & [Railway](https://railway.app) for deployment platforms
 - [React](https://react.dev) & [Vite](https://vitejs.dev) communities
 
----
-
-## 📞 Support & Feedback
-
-Have questions or suggestions? Open an [issue](https://github.com/e5ha-r/Pinterestify/issues) on GitHub.
-
----
 
 **Made with ❤️ by e5ha-r | Last Updated: May 2026**
