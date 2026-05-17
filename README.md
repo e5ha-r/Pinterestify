@@ -1,281 +1,136 @@
-# 📌 Pinterestify — MERN Stack Pinterest + Spotify App
+📌 Pinterestify — Visual Board + Music Integration Platform
 
-> A Pinterest-style board app where you can save aesthetic pins and attach Spotify music to your boards.
+A full-stack Pinterest-inspired web application enhanced with Spotify integration, enabling users to create aesthetic visual boards and attach music playlists to enrich the browsing experience.
 
----
+🚀 Live Deployment
+🌐 Frontend (Vercel): https://pinterestify.vercel.app
+⚙️ Backend (Railway): Add your Railway backend link here
+🧠 Project Motivation
 
-## 🚀 Tech Stack
+Pinterestify was designed to merge visual inspiration with music-driven emotion mapping in a single platform.
 
-| Layer     | Technology                          |
-|-----------|-------------------------------------|
-| Frontend  | React 18, React Router v6, Vite     |
-| Backend   | Node.js, Express 5                  |
-| Database  | MongoDB Atlas (Mongoose ODM)        |
-| Auth      | JWT (jsonwebtoken) + bcryptjs       |
-| Music API | Spotify Web API (OAuth 2.0)         |
+While traditional Pinterest-style platforms focus solely on images, Pinterestify enhances the experience by allowing users to associate Spotify playlists with boards, creating a multi-sensory digital scrapbook.
 
----
+This project also demonstrates a complete full-stack engineering workflow, including:
 
-## 📁 Project Structure
-
-```
-pinterestify/
-├── client/                 # React frontend (Vite)
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── Sidebar.jsx
-│   │   │   ├── PinCard.jsx
-│   │   │   ├── PinModal.jsx
-│   │   │   ├── Modal.jsx
-│   │   │   └── PlaylistCard.jsx
-│   │   ├── context/
-│   │   │   └── context.jsx # Global state (React Context API)
-│   │   ├── pages/
-│   │   │   ├── Login.jsx
-│   │   │   ├── Signup.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── Explore.jsx
-│   │   │   ├── CreateBoard.jsx
-│   │   │   ├── CreatePin.jsx
-│   │   │   ├── BoardDetail.jsx
-│   │   │   └── Profile.jsx
-│   │   ├── utils/
-│   │   │   └── toast.js    # Lightweight toast notifications
-│   │   ├── api.js          # Axios instance with JWT interceptors
-│   │   ├── main.jsx        # App entry point with routing
-│   │   └── index.css       # Global styles + masonry grid
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
+Secure authentication systems
+REST API architecture
+Database design with MongoDB
+Third-party OAuth integration (Spotify)
+Cloud deployment using Railway and Vercel
+Dockerized backend for portability and scalability
+🛠️ Tech Stack
+Layer	Technology
+Frontend	React 18, Vite, React Router
+Backend	Node.js, Express.js
+Database	MongoDB Atlas (Mongoose ODM)
+Authentication	JWT, bcryptjs
+Music API	Spotify Web API (OAuth 2.0)
+Deployment	Railway (Backend), Vercel (Frontend)
+Containerization	Docker
+📁 Project Structure
+Pinterestify/
+├── client/                  # React Frontend (Vite)
+│   ├── components/          # Reusable UI components
+│   ├── pages/               # Application pages
+│   ├── context/             # Global state (React Context API)
+│   └── api.js               # Axios configuration
 │
-└── server/                 # Express backend
-    ├── models/
-    │   ├── User.js         # User schema
-    │   ├── Board.js        # Board + embedded pins schema
-    │   └── Pin.js          # Global pins feed schema
-    ├── routes/
-    │   ├── boards.js       # CRUD for boards + pin management
-    │   ├── pins.js         # Global pins feed
-    │   └── spotify.js      # OAuth + playlists/tracks
-    ├── middleware/
-    │   └── auth.js         # JWT protect middleware
-    ├── index.js            # Express app entry point
-    ├── seed.js             # Seed script for pin data
-    ├── .env                # Environment variables (DO NOT COMMIT)
-    └── package.json
-```
+├── server/                  # Express Backend
+│   ├── models/              # MongoDB schemas (User, Board, Pin)
+│   ├── routes/             # API endpoints
+│   ├── middleware/         # JWT authentication middleware
+│   ├── index.js            # Server entry point
+│   └── seed.js             # Database seeding script
+│
+├── Dockerfile              # Backend container configuration
+└── README.md
+⚙️ Core Features
+🔐 Authentication System
+Secure user registration and login
+Password hashing using bcryptjs
+JWT-based authentication with token persistence
+📌 Board Management System
+Create, update, and delete boards
+Public and private board visibility
+Save and organize pins within boards
+🎵 Spotify Integration
+OAuth 2.0 login flow with Spotify
+Attach playlists to boards
+Embedded music playback experience
+🖼️ Pin System
+Global pin feed accessible to all users
+Category-based organization
+Image-based content with metadata support
+🧭 Explore System
+Browse public boards created by users
+Filter boards by categories (Music, Aesthetic, Food, Art, etc.)
+👤 User Profile System
+Editable display name
+Avatar selection system
+User statistics (boards + pins)
+🧠 System Architecture
+React Frontend → Express API → MongoDB Atlas
+                         ↓
+                 Spotify Web API
+Frontend communicates via REST API calls
+Backend handles authentication, business logic, and database operations
+Spotify API provides external music integration
+📸 Screenshots
 
----
+Add screenshots inside a /screenshots folder in your repository.
 
-## ⚙️ Local Setup
+🔐 Login Page
 
-### Prerequisites
-- Node.js v18+
-- npm v9+
-- MongoDB Atlas account (free tier works)
-- Spotify Developer account (free)
+🏠 Dashboard
 
-### 1. Clone & Install
+🧭 Explore Page
 
-```bash
-# Install server dependencies
-cd server
-npm install
+🎨 Create Board
 
-# Install client dependencies
-cd ../client
-npm install
-```
+📌 Board Detail Page
 
-### 2. Configure Environment Variables
+👤 Profile Page
 
-Edit `server/.env`:
+🚀 Deployment Guide
+🐳 Docker (Local / Railway Compatible)
+# Build Docker image
+docker build -t pinterestify .
 
-```env
-PORT=5050
+# Run container
+docker run -p 8000:8000 pinterestify
+☁️ Railway Deployment (Backend)
+Push project to GitHub
+Go to https://railway.app
+Create new project → Deploy from GitHub repo
+Select repository
 
-# MongoDB Atlas — see section below
-MONGO_URI=mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/pinterestify?retryWrites=true&w=majority
+Add environment variables:
 
-# JWT secret — change this to something long and random in production
-JWT_SECRET=YourSuperSecretKeyHere
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_secret_key
+SPOTIFY_CLIENT_ID=your_id
+SPOTIFY_CLIENT_SECRET=your_secret
+Railway will automatically:
+Build Dockerfile
+Install dependencies
+Run backend server
+🌐 Frontend Deployment (Vercel)
+Connect GitHub repo to Vercel
+Select /client as root directory
 
-# Spotify — see section below
-SPOTIFY_CLIENT_ID=your_spotify_client_id
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-SPOTIFY_REDIRECT_URI=http://127.0.0.1:5050/api/spotify/callback
-```
+Add environment variable:
 
-### 3. Seed the Database
-
-```bash
-cd server
-node seed.js
-```
-
-### 4. Run the App
-
-**Terminal 1 — Backend:**
-```bash
-cd server
-npm run dev        # uses nodemon for auto-reload
-```
-
-**Terminal 2 — Frontend:**
-```bash
-cd client
-npm run dev
-```
-
-- Frontend: http://127.0.0.1:5173
-- Backend:  http://127.0.0.1:5050
-
----
-
-## 🍃 MongoDB Atlas — Secure Connection Guide
-
-### Step 1: Create a Free Cluster
-1. Go to [https://cloud.mongodb.com](https://cloud.mongodb.com) → **Sign Up / Log In**
-2. Create a **Free Shared Cluster** (M0 Sandbox, any region)
-
-### Step 2: Create a Database User
-1. Left sidebar → **Database Access** → **Add New Database User**
-2. Choose **Password** authentication
-3. Set a username and **strong password** (no `@`, `#`, or special URI chars)
-4. Role: **Read and write to any database**
-5. Click **Add User**
-
-### Step 3: Whitelist Your IP
-1. Left sidebar → **Network Access** → **Add IP Address**
-2. For development: click **Allow Access From Anywhere** (0.0.0.0/0)
-3. For production: add only your server's IP
-
-### Step 4: Get Your Connection String
-1. Left sidebar → **Database** → **Connect** on your cluster
-2. Choose **Connect your application**
-3. Driver: **Node.js**, Version: **5.5 or later**
-4. Copy the SRV connection string — it looks like:
-   ```
-   mongodb+srv://<username>:<password>@cluster0.xxxxxx.mongodb.net/?retryWrites=true&w=majority
-   ```
-5. Replace `<username>` and `<password>`, then add the DB name:
-   ```
-   mongodb+srv://myuser:mypass@cluster0.xxxxxx.mongodb.net/pinterestify?retryWrites=true&w=majority&appName=Pinterestify
-   ```
-
-### Why this connection string is secure:
-- `mongodb+srv://` — uses DNS SRV records, automatically handles replica sets
-- `retryWrites=true` — automatically retries failed write operations
-- `w=majority` — confirms write is acknowledged by the majority of replica members (data safety)
-- `appName=Pinterestify` — identifies your app in Atlas monitoring logs
-- The `.env` file is **never committed** to Git (it's in `.gitignore`)
-
----
-
-## 🎵 Spotify Integration Setup
-
-### Step 1: Create a Spotify App
-1. Go to [https://developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
-2. Log in → **Create App**
-3. Fill in:
-   - **App name**: Pinterestify
-   - **App description**: Pinterest + Music
-   - **Website**: `http://127.0.0.1:5173`
-   - **Redirect URI**: `http://127.0.0.1:5050/api/spotify/callback`
-
-> ⚠️ **CRITICAL**: Spotify does NOT allow `localhost` as a redirect URI.  
-> You MUST use the explicit IPv4 address: `http://127.0.0.1:PORT`  
-> (or IPv6: `http://[::1]:PORT` — but IPv4 is simpler)
-
-### Step 2: Get Your Credentials
-1. In your Spotify app dashboard → **Settings**
-2. Copy **Client ID** and **Client Secret**
-3. Paste them into `server/.env`
-
-### Step 3: Verify Redirect URI
-In Spotify Dashboard → **Edit Settings** → **Redirect URIs**:
-```
-http://127.0.0.1:5050/api/spotify/callback
-```
-Click **Add** → **Save**. The URI must match **exactly** (no trailing slash, correct port).
-
-### How It Works (OAuth 2.0 Authorization Code Flow)
-
-```
-User clicks "Connect Spotify"
-        │
-        ▼
-GET /api/spotify/login
-        │  redirects to Spotify accounts page
-        ▼
-Spotify Authorization Page (user approves)
-        │  sends back ?code=...
-        ▼
-GET /api/spotify/callback
-        │  exchanges code for access + refresh tokens
-        │  saves tokens to MongoDB User document
-        ▼
-Redirects to /dashboard?spotify=connected
-        │
-        ▼
-GET /api/spotify/playlists
-        │  uses stored access token
-        │  auto-refreshes on 401 using refresh token
-        ▼
-Returns playlists to frontend
-```
-
-### Unsuccessful Integration
-Spotify does not give access to it db unless its 25 whitelisted users. 
-So we were not able to access the spotify data and get OAUTH. hence we had to use the publicallly available playlists only.
-
----
-
-## 🌐 Pages & Features
-
-| Route          | Page          | Description                              |
-|----------------|---------------|------------------------------------------|
-| `/`            | Login         | JWT-based login with validation          |
-| `/signup`      | Signup        | User registration                        |
-| `/dashboard`   | Dashboard     | Masonry pin feed with search & save      |
-| `/explore`     | Explore       | Browse all public boards by category     |
-| `/create`      | Create Board  | Create a new board with color picker     |
-| `/create-pin`  | Create Pin    | Add a new pin to the global feed         |
-| `/board/:id`   | Board Detail  | View pins + attach Spotify playlists     |
-| `/profile`     | Profile       | Edit name, pick avatar, view stats       |
-
----
-
-## 🧠 Architecture (MVC Pattern)
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                      CLIENT (View)                       │
-│  React Components + Context API (useState/useEffect)     │
-│  Axios → /api/* (Vite proxy → Express server)           │
-└─────────────────────┬───────────────────────────────────┘
-                      │ HTTP / JSON
-┌─────────────────────▼───────────────────────────────────┐
-│                   SERVER (Controller)                    │
-│  Express Routes → Middleware (JWT auth) → Route handlers │
-└─────────────────────┬───────────────────────────────────┘
-                      │ Mongoose ODM
-┌─────────────────────▼───────────────────────────────────┐
-│                     MODEL (Data)                         │
-│  MongoDB Atlas — User, Board (+ embedded pins), Pin      │
-└─────────────────────────────────────────────────────────┘
-                      │ Spotify Web API
-┌─────────────────────▼───────────────────────────────────┐
-│                  EXTERNAL API                            │
-│  Spotify OAuth 2.0 — playlists, tracks, preview URLs    │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🚀 Deployment (Bonus)
-
-### Frontend → Vercel
-[connect to Vercel, auto-deploys](https://pinterestify.vercel.app/)
-``
+VITE_API_BASE_URL=https://your-railway-backend-url
+Deploy automatically
+⚠️ Known Limitation
+Spotify OAuth is restricted in development mode (25-user limit for unverified apps)
+Due to this restriction, full OAuth integration may not be accessible publicly
+Fallback implementation uses embedded playlist playback
+🧪 Future Improvements
+Real-time collaborative boards (WebSockets)
+AI-based content recommendation system
+Cloud image uploads (Cloudinary integration)
+Mobile-first PWA version
+Drag-and-drop board organization
+Advanced search and tagging system
