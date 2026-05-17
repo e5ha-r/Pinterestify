@@ -15,9 +15,18 @@ FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Replace default nginx config (important for React Router)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx config template
+COPY client/nginx.conf /etc/nginx/conf.d/default.conf.template
 
-EXPOSE 80
+# Install envsubst for environment variable substitution
+RUN apk add --no-cache gettext
 
-CMD ["nginx", "-g", "daemon off;"]
+# Create startup script
+RUN echo '#!/bin/sh\n\
+envsubst < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf\n\
+nginx -g "daemon off;"\n\
+' > /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
+
+EXPOSE 8000
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
