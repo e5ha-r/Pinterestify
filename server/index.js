@@ -19,10 +19,10 @@ const app = express();
 
 // --- 1. MIDDLEWARE SETUP ---
 app.use(cors({
-    // Use 127.0.0.1 explicitly — localhost is not allowed by Spotify OAuth
     origin: [
+        "https://pinterestify-3l0opnrv5-e5ha-rs-projects.vercel.app",  // Production Vercel
         "http://127.0.0.1:5173",
-        "http://localhost:5173",    // kept as fallback for non-Spotify flows
+        "http://localhost:5173",    // Local development
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
@@ -117,13 +117,11 @@ app.use((err, req, res, next) => {
 });
 
 // --- 5. START SERVER ---
-// Bind to 127.0.0.1 (IPv4) so Spotify OAuth redirect URIs work correctly
-// Spotify does NOT support "localhost" — use 127.0.0.1 explicitly
-const PORT = process.env.PORT || 5050;
-const HOST = '127.0.0.1';
+// Railway uses process.env.PORT, fallback to 8000 for local development
+const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, HOST, () => {
-    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
-    console.log(`🎵 Spotify callback: http://${HOST}:${PORT}/api/spotify/callback`);
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🍃 MongoDB: Atlas (cloud)`);
+    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
