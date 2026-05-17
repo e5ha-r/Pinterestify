@@ -16,7 +16,7 @@
 | Environment | URL |
 |-------------|-----|
 | **Frontend** | [https://pinterestify.vercel.app](https://pinterestify.vercel.app) |
-
+| **Backend** | [pinterestify-production.up.railway.app](https://pinterestify-production.up.railway.app/)
 
 ## 🧠 Project Motivation
 
