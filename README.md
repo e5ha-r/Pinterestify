@@ -1,8 +1,16 @@
 # 📌 Pinterestify — Visual Board + Music Integration Platform
 
 > A full-stack Pinterest-inspired web application enhanced with Spotify integration, enabling users to create aesthetic visual boards and attach music playlists to enrich the browsing experience.
+>
+> Login Page:
+           <img width="779" height="723" alt="image" src="https://github.com/user-attachments/assets/e193a8ac-0584-4d53-adf5-8d548b6b3898" />
 
-<img width="654" height="533" alt="image" src="https://github.com/user-attachments/assets/6d2c9df7-13e1-48c2-9807-82fd681cfc71" />
+Home Page:
+          <img width="910" height="901" alt="image" src="https://github.com/user-attachments/assets/d8eaf95b-3266-4e9b-9980-3086d56de838" />
+
+The Board created and Songs Selection:
+           <img width="882" height="877" alt="image" src="https://github.com/user-attachments/assets/9a1977c0-168b-47c0-9c7a-4c288fd6b26d" />
+
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
