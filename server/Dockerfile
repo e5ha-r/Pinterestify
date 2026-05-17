@@ -1,13 +1,18 @@
-FROM node:18-alpine
+# Base image
+FROM node:18
 
+# Create app directory
 WORKDIR /app
 
-# Copy backend only
-COPY server/package*.json ./
+# Install dependencies
+COPY package*.json ./
 RUN npm install
 
-COPY server ./
+# Copy source code
+COPY . .
 
-EXPOSE 8000
+# Expose port (Railway will override if needed)
+EXPOSE 5050
 
-CMD ["node", "index.js"]
+# Start server
+CMD ["npm", "run", "dev"]
