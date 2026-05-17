@@ -117,11 +117,8 @@ app.use((err, req, res, next) => {
 });
 
 // --- 5. START SERVER ---
-// Railway uses process.env.PORT, fallback to 8000 for local development
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 5050;
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🍃 MongoDB: Atlas (cloud)`);
-    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Server running on port ${PORT}`);
 });
