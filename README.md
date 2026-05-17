@@ -16,10 +16,7 @@
 | Environment | URL |
 |-------------|-----|
 | **Frontend** | [https://pinterestify.vercel.app](https://pinterestify.vercel.app) |
-| **Backend API** | [Railway Backend Link](https://railway.app) |
-| **API Documentation** | [Postman Collection](#postman-collection) |
 
----
 
 ## 🧠 Project Motivation
 
